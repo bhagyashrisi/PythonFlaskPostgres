@@ -28,17 +28,23 @@ def login():
       print(data)
       rows = model.User.query.filter_by(username=data['username']).first()
       if not rows:
-        return {'items': [], 'count': 0, 'message': 'success'} #returning empty response
+        return {'status':'USER404', 'message': 'user not found'} #returning empty response
       else:
         result = [
               {
                   'id': rows.id,
                   'username': rows.username,
-                  'password':rows.password_hash,
+                  'password_hash':rows.password_hash,
                   'joined_at': rows.joined_at,
                   'email': rows.email
-              } ]             
-        return jsonify(result)  # returning response
+              } ]
+        checkResp=check_password_hash(rows.password_hash,data['password'])
+        print(checkResp)
+        if checkResp == True:             
+          return jsonify(result)  # returning response
+        else:
+          return {'status':'PASS500','message':'invalid password'}
+
     except Exception as error:
       print(error)
       return str(error)
